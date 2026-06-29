@@ -1,0 +1,59 @@
+:root {
+  color: #f5f7fa;
+  background: #0a0d12;
+  font-family: Inter, Avenir, Helvetica, Arial, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+button,
+canvas {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.app canvas {
+  display: block;
+  touch-action: none;
+}
+
+.hidden {
+  opacity: 0;
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  max-width: min(32rem, calc(100vw - 2.5rem));
+  pointer-events: none;
+  transform: translate(-50%, 0%);
+}
+
+.hidden-active {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.eyebrow {
+  margin: 0 0 0.7rem;
+  color: #59d9c2;
+  font-size: 26px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
