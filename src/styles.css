@@ -57,3 +57,51 @@ canvas {
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
+
+.motion-control {
+  position: absolute;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: end;
+  gap: 0.55rem;
+  max-width: min(18rem, calc(100vw - 2rem));
+}
+
+.motion-button {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  color: #f5f7fa;
+  background: rgb(10 13 18 / 82%);
+  box-shadow: 0 0.4rem 1.5rem rgb(0 0 0 / 25%);
+  font: 600 0.82rem/1 system-ui, sans-serif;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.motion-button[aria-pressed="true"] {
+  border-color: #59d9c2;
+  color: #08110f;
+  background: #59d9c2;
+}
+
+.motion-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.motion-button:focus-visible {
+  outline: 3px solid rgb(89 217 194 / 40%);
+  outline-offset: 3px;
+}
+
+.motion-message {
+  margin: 0;
+  color: #d2d7df;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  text-align: right;
+  text-shadow: 0 1px 8px #000;
+}

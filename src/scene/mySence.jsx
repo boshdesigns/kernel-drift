@@ -1,13 +1,9 @@
-import * as THREE from "three";
 import { ScreenBounds } from "../components/screenbounds";
 import { Physics } from "@react-three/rapier";
 import Objects from "../components/instancedRigidBodies";
-import { usePhoneTiltGravity } from "../utils/phoneTilt";
 import { TiltGravityController } from "../utils/rapierGravity";
 
-export const Scene = ({ pointerActive }) => {
-  const tilt = usePhoneTiltGravity(14);
-
+export const Scene = ({ pointerActive, motionGravity, motionEnabled }) => {
   return (
     <>
       <ambientLight intensity={0.6} />
@@ -20,7 +16,10 @@ export const Scene = ({ pointerActive }) => {
       <Physics gravity={[0, -9.81, 0]} debug={false}>
         <ScreenBounds />
         <Objects pointerActive={pointerActive} />
-        <TiltGravityController gravity={tilt.gravity} enabled={tilt.enabled} />
+        <TiltGravityController
+          gravity={motionGravity}
+          enabled={motionEnabled}
+        />
       </Physics>
     </>
   );

@@ -10,6 +10,11 @@ import { useGLTF } from "@react-three/drei";
 
 useGLTF.preload("./assets/models/popcorn/popcorn.glb");
 
+function seededSpread(seed, range) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453;
+  return (value - Math.floor(value) - 0.5) * range;
+}
+
 export default function Objects({ pointerActive }) {
   const { viewport } = useThree();
 
@@ -57,18 +62,18 @@ export default function Objects({ pointerActive }) {
     return Array.from({ length: count }, (_, i) => ({
       key: `instance-${i}`,
       position: [
-        THREE.MathUtils.randFloatSpread(viewport.width * 0.8),
-        THREE.MathUtils.randFloatSpread(viewport.height * 0.8),
+        seededSpread(i * 3 + 1, viewport.width * 0.8),
+        seededSpread(i * 3 + 2, viewport.height * 0.8),
         0,
       ],
       rotation: [
-        THREE.MathUtils.randFloatSpread(Math.PI),
-        THREE.MathUtils.randFloatSpread(Math.PI),
-        Math.random() * Math.PI,
+        seededSpread(i * 3 + 3, Math.PI),
+        seededSpread(i * 3 + 4, Math.PI),
+        seededSpread(i * 3 + 5, Math.PI * 2),
       ],
       scale: [modelScale, modelScale, modelScale],
     }));
-  }, [viewport.width, viewport.height]);
+  }, [count, viewport.width, viewport.height]);
 
   return (
     <>
