@@ -1,54 +1,53 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_GRAVITY = Object.freeze({ x: 0, y: -9.81, z: 0 });
-const SIDEWAYS_GRAVITY = 14;
+const GRAVITY_SCALE = 14 / 9.81;
 
-function shortestAngle(from, to) {
-  return ((to - from + 540) % 360) - 180;
-}
-
-function getScreenRoll(event) {
+function toScreenCoordinates(x, y) {
   const angle = screen.orientation?.angle ?? window.orientation ?? 0;
 
-  if (angle === 90) return event.beta;
-  if (angle === 270 || angle === -90) return -event.beta;
-  if (Math.abs(angle) === 180) return -event.gamma;
-  return event.gamma;
+  if (angle === 90) return { x: -y, y: x };
+  if (angle === 270 || angle === -90) return { x: y, y: -x };
+  if (Math.abs(angle) === 180) return { x: -x, y: -y };
+  return { x, y };
 }
 
 export function useMotionGravity() {
   const gravity = useRef({ ...DEFAULT_GRAVITY });
-  const neutralRoll = useRef(null);
   const listening = useRef(false);
   const [status, setStatus] = useState("idle");
 
-  const handleOrientation = useCallback((event) => {
-    const roll = getScreenRoll(event);
-    if (!Number.isFinite(roll)) return;
+  const handleMotion = useCallback((event) => {
+    const acceleration = event.accelerationIncludingGravity;
+    if (
+      !acceleration ||
+      !Number.isFinite(acceleration.x) ||
+      !Number.isFinite(acceleration.y)
+    ) {
+      return;
+    }
 
-    if (neutralRoll.current === null) neutralRoll.current = roll;
+    const screenGravity = toScreenCoordinates(acceleration.x, acceleration.y);
 
-    const tilt = shortestAngle(neutralRoll.current, roll);
-    const radians = (tilt * Math.PI) / 180;
-
-    gravity.current.x = Math.sin(radians) * SIDEWAYS_GRAVITY;
-    gravity.current.y = DEFAULT_GRAVITY.y * Math.cos(radians);
+    // accelerationIncludingGravity is the support force (opposite gravity),
+    // so invert it before applying it to the 2D Rapier world.
+    gravity.current.x = -screenGravity.x * GRAVITY_SCALE;
+    gravity.current.y = -screenGravity.y * GRAVITY_SCALE;
     gravity.current.z = 0;
   }, []);
 
   const stop = useCallback(() => {
     if (listening.current) {
-      window.removeEventListener("deviceorientation", handleOrientation);
+      window.removeEventListener("devicemotion", handleMotion);
       listening.current = false;
     }
 
-    neutralRoll.current = null;
     Object.assign(gravity.current, DEFAULT_GRAVITY);
     setStatus("idle");
-  }, [handleOrientation]);
+  }, [handleMotion]);
 
   const start = useCallback(async () => {
-    if (!("DeviceOrientationEvent" in window)) {
+    if (!("DeviceMotionEvent" in window)) {
       setStatus("unsupported");
       return;
     }
@@ -56,11 +55,11 @@ export function useMotionGravity() {
     setStatus("requesting");
 
     try {
-      const requestPermission = window.DeviceOrientationEvent.requestPermission;
+      const requestPermission = window.DeviceMotionEvent.requestPermission;
 
       if (typeof requestPermission === "function") {
         const permission = await requestPermission.call(
-          window.DeviceOrientationEvent,
+          window.DeviceMotionEvent,
         );
 
         if (permission !== "granted") {
@@ -69,15 +68,14 @@ export function useMotionGravity() {
         }
       }
 
-      neutralRoll.current = null;
-      window.addEventListener("deviceorientation", handleOrientation);
+      window.addEventListener("devicemotion", handleMotion);
       listening.current = true;
       setStatus("active");
     } catch (error) {
       console.error("Could not enable the motion effect", error);
       setStatus("error");
     }
-  }, [handleOrientation]);
+  }, [handleMotion]);
 
   const toggle = useCallback(() => {
     if (status === "active") {
