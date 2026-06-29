@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_GRAVITY = Object.freeze({ x: 0, y: -9.81, z: 0 });
-const MAX_TILT_DEGREES = 35;
 const SIDEWAYS_GRAVITY = 14;
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
 
 function shortestAngle(from, to) {
   return ((to - from + 540) % 360) - 180;
@@ -33,11 +28,7 @@ export function useMotionGravity() {
 
     if (neutralRoll.current === null) neutralRoll.current = roll;
 
-    const tilt = clamp(
-      shortestAngle(neutralRoll.current, roll),
-      -MAX_TILT_DEGREES,
-      MAX_TILT_DEGREES,
-    );
+    const tilt = shortestAngle(neutralRoll.current, roll);
     const radians = (tilt * Math.PI) / 180;
 
     gravity.current.x = Math.sin(radians) * SIDEWAYS_GRAVITY;
