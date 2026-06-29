@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getPlatform } from "../utils/platformDetection.js";
 
 const DEFAULT_GRAVITY = Object.freeze({ x: 0, y: -9.81, z: 0 });
 const GRAVITY_SCALE = 14 / 9.81;
@@ -14,6 +15,7 @@ function toScreenCoordinates(x, y) {
 
 export function useMotionGravity() {
   const gravity = useRef({ ...DEFAULT_GRAVITY });
+  const gravityPolarity = useRef(-1);
   const listening = useRef(false);
   const [status, setStatus] = useState("idle");
 
@@ -29,10 +31,10 @@ export function useMotionGravity() {
 
     const screenGravity = toScreenCoordinates(acceleration.x, acceleration.y);
 
-    // accelerationIncludingGravity is the support force (opposite gravity),
-    // so invert it before applying it to the 2D Rapier world.
-    gravity.current.x = -screenGravity.x * GRAVITY_SCALE;
-    gravity.current.y = -screenGravity.y * GRAVITY_SCALE;
+    gravity.current.x =
+      screenGravity.x * gravityPolarity.current * GRAVITY_SCALE;
+    gravity.current.y =
+      screenGravity.y * gravityPolarity.current * GRAVITY_SCALE;
     gravity.current.z = 0;
   }, []);
 
@@ -56,8 +58,14 @@ export function useMotionGravity() {
 
     try {
       const requestPermission = window.DeviceMotionEvent.requestPermission;
+      const requiresMotionPermission = typeof requestPermission === "function";
+      const isIOS = getPlatform().os === "ios";
 
-      if (typeof requestPermission === "function") {
+      // iOS exposes accelerationIncludingGravity with the opposite polarity
+      // to the values currently reported by Android devices.
+      gravityPolarity.current = isIOS ? 1 : -1;
+
+      if (requiresMotionPermission) {
         const permission = await requestPermission.call(
           window.DeviceMotionEvent,
         );

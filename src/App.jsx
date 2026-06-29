@@ -10,8 +10,6 @@ export default function App() {
   const hiddenRef = useRef(null);
   const motion = useMotionGravity();
 
-  console.log("isDesktop()", isDesktop());
-
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       if (hiddenRef.current) {
