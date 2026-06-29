@@ -3,11 +3,14 @@ import { Canvas } from "@react-three/fiber";
 import { Loader, OrthographicCamera } from "@react-three/drei";
 import { Scene } from "./scene/mySence.jsx";
 import { useMotionGravity } from "./hooks/useMotionGravity.js";
+import { isDesktop } from "./utils/deviceDetection";
 
 export default function App() {
   const pointerActive = useRef(false);
   const hiddenRef = useRef(null);
   const motion = useMotionGravity();
+
+  console.log("isDesktop()", isDesktop());
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -47,22 +50,24 @@ export default function App() {
         </Suspense>
       </Canvas>
 
-      <div className="motion-control">
-        <button
-          className="motion-button"
-          type="button"
-          onClick={motion.toggle}
-          disabled={motion.status === "requesting"}
-          aria-pressed={motion.status === "active"}
-        >
-          {motion.label}
-        </button>
-        {motion.message && (
-          <p className="motion-message" role="status">
-            {motion.message}
-          </p>
-        )}
-      </div>
+      {isDesktop() !== "desktop" && (
+        <div className="motion-control">
+          <button
+            className="motion-button"
+            type="button"
+            onClick={motion.toggle}
+            disabled={motion.status === "requesting"}
+            aria-pressed={motion.status === "active"}
+          >
+            {motion.label}
+          </button>
+          {motion.message && (
+            <p className="motion-message" role="status">
+              {motion.message}
+            </p>
+          )}
+        </div>
+      )}
 
       <Loader />
     </main>
